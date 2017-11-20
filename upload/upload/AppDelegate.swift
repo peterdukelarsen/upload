@@ -7,6 +7,9 @@
 //
 
 import UIKit
+import AWSCore
+import AWSCognito
+import AWSS3
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +19,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        let credentialProvider = AWSCognitoCredentialsProvider(regionType: .USEast1, identityPoolId: "us-east-1:e8e2f953-3040-4688-be6f-0e6916f02e51")
+        let configuration = AWSServiceConfiguration(region: .USEast1, credentialsProvider: credentialProvider)
+        AWSServiceManager.default().defaultServiceConfiguration = configuration
+
+        credentialProvider.getIdentityId().continueWith(block: {(task) -> AnyObject? in
+            if (task.error != nil) {
+                print("Error: " + task.error!.localizedDescription)
+            }
+            else {
+                // the task result will contain the identity id
+                let cognitoId = task.result!
+                print("Cognito id: \(cognitoId)")
+            }
+            AWSS3TransferManager.register(with: configuration!, forKey: "us-east")
+            return task
+        })
+        
         return true
     }
 
