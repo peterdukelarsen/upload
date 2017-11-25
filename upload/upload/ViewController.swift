@@ -11,10 +11,10 @@ import AWSS3
 
 let squirrelUrl = "https://s3.amazonaws.com/luminary-public-resources/ucberkley.jpg"
 class ViewController: UIViewController {
-    let transferManager = AWSS3TransferManager.s3TransferManager(forKey: "us-east")
+    var transferManager = AWSS3TransferManager.s3TransferManager(forKey: "us-east")
     override func viewDidLoad() {
         super.viewDidLoad()
-        stuff()
+        downloadTest()
         // Do any additional setup after loading the view, typically from a nib.
 
     }
@@ -23,15 +23,15 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    func stuff() -> Void {
+    func downloadTest() -> Void {
         let downloadingFileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("myImage.jpg")
-        
+        // AppDelegate runs after ViewController is initialized, so needed to re-init the transfer manager
+        transferManager = AWSS3TransferManager.s3TransferManager(forKey: "us-east")
         let downloadRequest = AWSS3TransferManagerDownloadRequest()
         downloadRequest!.bucket = "luminary-common-storage"
         downloadRequest!.key = "thing.png"
         downloadRequest!.downloadingFileURL = downloadingFileURL
         transferManager.download(downloadRequest!).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AnyObject>) -> Any? in
-            
             if let error = task.error as NSError? {
                 if error.domain == AWSS3TransferManagerErrorDomain, let code = AWSS3TransferManagerErrorType(rawValue: error.code) {
                     switch code {
