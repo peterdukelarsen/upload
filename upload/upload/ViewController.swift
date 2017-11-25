@@ -47,7 +47,13 @@ class ViewController: UIViewController {
                 return nil
             }
             print("Download complete for: \(downloadRequest?.key ?? "thing")")
-            let downloadOutput = task.result
+            let downloadOutput = task.result as! AWSS3TransferManagerDownloadOutput
+            let fileUrl: URL = downloadOutput.body as! URL
+            
+            
+            let image: UIImage? = UIImage(data: NSData(contentsOf: fileUrl)! as Data)
+            let imageView = UIImageView(image: image)
+            self.view.addSubview(imageView)
             return nil
         })
     }
